@@ -104,8 +104,7 @@ class AirCargoProblem(Problem):
                 for to in self.airports:
                     if fr != to:
                         for p in self.planes:
-                            precond_pos = [expr("At({}, {})".format(p, fr)),
-                                           ]
+                            precond_pos = [expr("At({}, {})".format(p, fr))]
                             precond_neg = []
                             effect_add = [expr("At({}, {})".format(p, to))]
                             effect_rem = [expr("At({}, {})".format(p, fr))]
@@ -203,7 +202,36 @@ class AirCargoProblem(Problem):
         executed.
         """
         # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
-        count = 0
+        # Get all the possible actions for this node
+        tmp_actions = self.actions_list
+        def remove_preconditions_n_effects(action):
+            """
+            :param action: Action
+                The action to remove the precondition and effects
+            :return: Action
+                returns the action after stripping out the precond and effects
+            """
+            action.precond_pos = []
+            action.precond_neg = []
+            action.effect_add = list(filter(lambda effect: effect in self.goal, action.effect_add))
+            action.effect_rem = list(filter(lambda effect: effect in self.goal, action.effect_rem))
+            return action
+
+        actions = list(map(remove_preconditions_n_effects, tmp_actions))
+        possible_actions = [act for act in actions if len(act.effect_add) > 0]
+
+        def find_min_count():
+            goal_set = set(self.goal)
+            action_set = set()
+            not_found_min = True
+            while not_found_min and len(possible_actions) > 0:
+                act = possible_actions.pop()
+                for efc in act.effect_add:
+                    action_set.add(efc)
+                if action_set.issuperset(goal_set):
+                    not_found_min = False
+            return len(action_set)
+        count = find_min_count()
         return count
 
 
