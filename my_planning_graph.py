@@ -318,8 +318,6 @@ class PlanningGraph():
             if act_node.prenodes.issubset(precond_set):
                 act_node.parents.union(precond_set)
                 self.a_levels[level].add(act_node)
-        print(f'Precondition set is {precond_set}')
-        print(f'Action level is {level} and set is {self.a_levels[level]}')
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
@@ -533,6 +531,13 @@ class PlanningGraph():
         :return: int
         """
         level_sum = 0
+        goal = self.problem.goal
+        def goal_to_lvl(gl):
+            node_s = PgNode_s(gl,True)
+            for i,lit_set in enumerate(self.s_levels):
+                if node_s in lit_set:
+                    return i
+        level_sum = sum(map(goal_to_lvl, goal), 0)
         # TODO implement
         # for each goal in the problem, determine the level cost, then add them together
         return level_sum
